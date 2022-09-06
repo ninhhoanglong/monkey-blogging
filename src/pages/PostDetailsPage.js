@@ -12,6 +12,7 @@ import { db } from "firebase-app/firebase-config";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { useAuth } from "contexts/auth-context";
 import { userRole } from "utils/constants";
+import slugify from "slugify";
 const PostDetailsPageStyles = styled.div`
   padding-bottom: 100px;
   .post {
@@ -125,6 +126,14 @@ const PostDetailsPage = () => {
   if (!slug) return <PageNotFound></PageNotFound>;
   if (!postInfo.title) return null;
   const { user } = postInfo;
+  console.log(
+    "🚀 ~ file: PostDetailsPage.js ~ line 129 ~ PostDetailsPage ~ postInfo",
+    postInfo
+  );
+  const date = userInfo?.createdAt?.seconds
+    ? new Date(userInfo?.createdAt?.seconds * 1000)
+    : new Date();
+  const formatDate = new Date(date).toLocaleDateString("vi-VI");
   return (
     <PostDetailsPageStyles>
       <Layout>
@@ -139,7 +148,11 @@ const PostDetailsPage = () => {
                 {postInfo.category?.name}
               </PostCategory>
               <h1 className="post-heading">{postInfo.title}</h1>
-              <PostMeta></PostMeta>
+              <PostMeta
+                to={slugify(user?.username || "", { lower: true })}
+                authorName={user?.fullname}
+                date={formatDate}
+              ></PostMeta>
               {/* Check if user role is ADMIN then can edit the post */}
               {userInfo?.role === userRole.ADMIN && (
                 <Link
